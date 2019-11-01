@@ -44,7 +44,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@drawable/ic_place_black_24dp"
-            tools:src="@drawable/image_button_selecter" />
+            tools:src="@drawable/image_button_selector" />
 
         <ImageButton
             android:id="@+id/btnDone"
@@ -52,7 +52,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:background="@drawable/ic_done_black_24dp"
-            tools:src="@drawable/image_button_selecter" />
+            tools:src="@drawable/image_button_selector" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

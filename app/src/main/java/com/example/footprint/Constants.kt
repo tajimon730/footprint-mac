@@ -6,7 +6,8 @@ enum class ModeInEdit {
 }
 
 enum class IntentKey {
-    EDIT_MODE, CONTENT_URI
+    EDIT_MODE, CONTENT_URI,LATITUDE,LONGITUDE
+
 }
 
 
@@ -16,3 +17,10 @@ val RQ_CODE_CAMERA = 100
 
 
 val PHOTO_FOLDER_NAME = "FOOTPRINT"
+
+val ZOOM_LEVEL_DETAIL = 15
+
+val ZOOM_LEVEL_MASTER = 5
+
+
+

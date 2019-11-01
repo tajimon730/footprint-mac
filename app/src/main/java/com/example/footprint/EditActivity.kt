@@ -19,6 +19,7 @@ import androidx.core.content.FileProvider
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.example.footprint.*
 import com.google.android.gms.location.LocationServices
+import io.realm.Realm
 import kotlinx.android.synthetic.main.activity_edit.*
 import kotlinx.android.synthetic.main.content_edit.*
 import java.io.File
@@ -68,7 +69,62 @@ class EditActivity : AppCompatActivity() {
 
         }
 
+        btnGoMap.setOnClickListener{
 
+            if (mode == ModeInEdit.SHOOT && !isGetLocation) {
+                Toast.makeText(this@EditActivity,getString(R.string.location_not_set),Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+
+            }
+            displayMap(selectedPhotoInfo.latitude, selectedPhotoInfo.longitude)
+
+        }
+
+        btnDone.setOnClickListener {
+            writePhotoInfoToRealm()
+        }
+
+
+
+    }
+
+    private fun writePhotoInfoToRealm() {
+
+
+        val realm = Realm.getDefaultInstance()
+        realm.beginTransaction()
+        var photoInfoRecord = PhotoInfoModel()
+
+        when(mode){
+            ModeInEdit.SHOOT -> {
+                photoInfoRecord = realm.createObject(PhotoInfoModel::class.java)
+
+            }
+            ModeInEdit.EDIT -> {
+
+            }
+        }
+        photoInfoRecord.apply {
+            stringContentUri = selectedPhotoInfo.stringContentUri
+            dateTime = selectedPhotoInfo.dateTime
+            latitude = selectedPhotoInfo.latitude
+            longitude = selectedPhotoInfo.longitude
+            location = latitude.toString() + longitude.toString()
+            comment = inputComment.text.toString()
+        }
+        realm.commitTransaction()
+
+        inputComment.setText("")
+        Toast.makeText(this@EditActivity, getString(R.string.photo_info_written), Toast.LENGTH_SHORT).show()
+        finish()
+    }
+
+    private fun displayMap(latitude: Double, longitude: Double) {
+        val geoString = "geo:" + latitude + "," + longitude + "?z=" + ZOOM_LEVEL_DETAIL
+        val gmmIntentUri = Uri.parse(geoString)
+        val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+        mapIntent.setPackage("com.google.android.apps.maps")
+        startActivity(mapIntent)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -296,8 +352,12 @@ class EditActivity : AppCompatActivity() {
                 when(mode){
                     ModeInEdit.SHOOT -> {
                         contentResolver.delete(Uri.parse(selectedPhotoInfo.stringContentUri),null,null)
+                        Toast.makeText(this@EditActivity, getString(R.string.photo_info_deleted),Toast.LENGTH_SHORT).show()
+                        finish()
+                        return true
                     }
-                    ModeInEdit.EDIT -> {
+                    ModeInEdit. EDIT-> {
+
 
 
 
@@ -315,4 +375,6 @@ class EditActivity : AppCompatActivity() {
         return true
 
     }
+
+
 }

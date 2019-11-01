@@ -5,15 +5,88 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
+import io.realm.Realm
+import io.realm.RealmResults
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
+
+
+
+    lateinit var mapFragment: SupportMapFragment
+
+    lateinit var realm: Realm
+    lateinit var results: RealmResults<PhotoInfoModel>
+    lateinit var locationList: ArrayList<PhotoInfoModel>
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        realm = Realm.getDefaultInstance()
+        results = realm.where(PhotoInfoModel::class.java).findAll().sort(PhotoInfoModel::location.name)
+
+
+        mapFragment = SupportMapFragment.newInstance()
+        supportFragmentManager.beginTransaction().add(R.id.container_map, mapFragment).commit()
+        mapFragment.getMapAsync(this)
+    }
+    override fun onMapReady(map: GoogleMap) {
+
+        map.uiSettings.isZoomControlsEnabled = true
+
+        if (results.size >0){
+            setUpLocationMarkers(map)
+        }
+        map.setOnMarkerClickListener(this)
+
+    }
+
+    override fun onMarkerClick(marker: Marker): Boolean {
+        val position = marker.position
+        val intent = Intent(this@MainActivity, GalleryActivity::class.java).apply {
+            putExtra(IntentKey.LATITUDE.name, position.latitude)
+            putExtra(IntentKey.LONGITUDE.name, position.longitude)
+        }
+        startActivity(intent)
+        return true
+    }
+
+    private fun setUpLocationMarkers(map: GoogleMap) {
+
+        locationList = ArrayList<PhotoInfoModel>()
+        locationList.add(results[0]!!)
+        for (i in 1 until results.size -1){
+            if (results[i]?.location != results[i-1]?.location){
+                locationList.add(results[i]!!)
+
+            }
+        }
+        val lastIndexOfLocationList = locationList.size -1
+        locationList.forEach{
+            map.addMarker(MarkerOptions().position(LatLng(it.latitude, it.longitude)))
+        }
+        val cameraPosition = CameraPosition.builder()
+            .target(LatLng(locationList[lastIndexOfLocationList].latitude,
+                locationList[lastIndexOfLocationList].longitude))
+            .zoom(ZOOM_LEVEL_MASTER.toFloat())
+            .build()
+        map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

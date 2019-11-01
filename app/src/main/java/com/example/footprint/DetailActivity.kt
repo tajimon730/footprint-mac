@@ -1,5 +1,7 @@
 package com.example.footprint
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
@@ -18,5 +20,13 @@ class DetailActivity : AppCompatActivity() {
                 .setAction("Action", null).show()
         }
     }
+/*
+    private fun displayMap(latitude: Double, longitude: Double) {
+        val geoString = "geo$latitude,$longitude?z=$ZOOM_LEVEL_DETAIL"
+        val gmmIntentUri = Uri.parse(geoString)
+        val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+        mapIntent.setPackage("com.google.android.apps.maps")
+        startActivity(mapIntent)
+    }*/
 
 }
